@@ -7,29 +7,75 @@
 //
 
 import UIKit
+import  Firebase
+import  FirebaseAuth
 
-class SignUpViewController: UIViewController {
 
+class SignUpViewController: UIViewController, UITextFieldDelegate {
+    
+    @IBOutlet var emailTextField: UITextField!
+    @IBOutlet var passwordTextField: UITextField!
+    @IBOutlet var rePasswordTextField: UITextField!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        emailTextField.delegate = self
+        passwordTextField.delegate = self
+        rePasswordTextField.delegate = self
+        rePasswordTextField.isSecureTextEntry = true
+        passwordTextField.isSecureTextEntry = true
         // Do any additional setup after loading the view.
     }
-
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        emailTextField.resignFirstResponder
+        passwordTextField.resignFirstResponder()
+        rePasswordTextField.resignFirstResponder()
+        return true
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    @IBAction func siginUpButtan(){
+        signUp()
+        
     }
-    */
-
+    
+    
+    func transitionToView()  {
+        self.performSegue(withIdentifier: "homeview", sender: self)
+    }
+    
+    
+    
+    func signUp(){
+        print("start sign up")
+        guard  let email = emailTextField.text else {return}
+        guard let password = passwordTextField.text else {return}
+        guard let repassword = rePasswordTextField.text else{return}
+        
+        if repassword == password{
+            
+            Auth.auth().createUser(withEmail: email, password: password) { (user, error) in
+                if error == nil {
+                    user?.sendEmailVerification(completion: { (error) in
+                        if error == nil{
+                            self.transitionToView()
+                            print("1")
+                        }else{
+                            print("\(String(describing: error?.localizedDescription))")
+                        }
+                    }
+                    )
+                }else{
+                    print("\(String(describing: error?.localizedDescription))")
+                }
+            }
+        }else{
+            print(2)
+        }
+    }
+    
 }
